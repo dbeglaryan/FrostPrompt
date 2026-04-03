@@ -11,6 +11,10 @@ venv/
 *.egg-info/
 dist/
 build/
+output/
+src/generate.py
+prompts/jobs/
+prompts/jobs/.*.progress.json
 .DS_Store
 Thumbs.db
 *.swp

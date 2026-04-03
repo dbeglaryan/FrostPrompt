@@ -116,15 +116,43 @@ python src/history.py fav "prompt" --name "My Best Prompt" --tags landscape gold
 python src/history.py favs
 ```
 
-### 9. Extensible Skill System
+### 9. Image Generation via Gemini API
+
+Generate images directly from the CLI or batch job files:
+```bash
+# Single image
+python src/generate.py single "A cyberpunk cityscape at night" --model pro --ratio 16:9 --res 4k
+
+# Batch job from a job file
+python src/generate.py job prompts/jobs/starprep-sonography-diagrams.json
+
+# Dry run (preview without generating)
+python src/generate.py job prompts/jobs/starprep-sonography-diagrams.json --dry-run
+
+# Resume a failed/interrupted job
+python src/generate.py job prompts/jobs/starprep-sonography-diagrams.json --resume
+
+# Generate specific prompts only
+python src/generate.py job prompts/jobs/starprep-sonography-diagrams.json --only 2a-sound-wave-anatomy,2b-transverse-vs-longitudinal
+
+# List available jobs
+python src/generate.py list
+
+# Check job progress
+python src/generate.py status prompts/jobs/starprep-sonography-diagrams.json -v
+```
+
+Create reusable job files in `prompts/jobs/` as JSON — see existing examples for the format.
+
+### 10. Extensible Skill System
 
 Includes a skill definition file that can be integrated with LLM-powered workflows to orchestrate all tools above automatically.
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/nano-banana-prompt-engineer.git
-cd nano-banana-prompt-engineer
+git clone https://github.com/dbeglaryan/FrostPrompt.git
+cd FrostPrompt
 
 # Core tools (no dependencies)
 python src/search.py search "sunset landscape" --limit 5
@@ -156,7 +184,7 @@ Copy `.claude/skills/nano-banana.md`, `src/`, and `prompts/` to your project. Th
 ## Project Structure
 
 ```
-nano-banana-prompt-engineer/
+FrostPrompt/
 ├── .claude/skills/
 │   └── nano-banana.md          # LLM skill definition
 ├── src/
@@ -169,13 +197,19 @@ nano-banana-prompt-engineer/
 │   ├── chain.py                # Iterative editing chains
 │   ├── multimodel.py           # Multi-model prompt formatter
 │   ├── history.py              # History & favorites
-│   └── export.py               # Multi-format export
+│   ├── export.py               # Multi-format export
+│   └── generate.py             # Gemini API image generator (single + batch)
 ├── prompts/
-│   └── database.csv            # 11,795 curated prompts
+│   ├── database.csv            # 11,795 curated prompts
+│   └── jobs/                   # Reusable batch job files
+│       └── starprep-sonography-diagrams.json
+├── output/                     # Generated images (gitignored)
 ├── templates/                  # Custom user templates
 ├── examples/
 │   └── frameworks.md           # Detailed framework examples
 ├── exports/                    # Saved exports
+├── .env.example                # API key template
+├── requirements.txt
 ├── README.md
 └── LICENSE
 ```
@@ -184,6 +218,13 @@ nano-banana-prompt-engineer/
 
 - **Core tools**: Python 3.8+ (no external dependencies)
 - **Semantic search**: `pip install sentence-transformers` (downloads ~90MB model on first use)
+- **Image generation**: `pip install google-generativeai` + a [Gemini API key](https://aistudio.google.com/apikey)
+
+Or install everything at once:
+```bash
+pip install -r requirements.txt
+cp .env.example .env  # Then add your API key
+```
 
 ## Contributing
 
