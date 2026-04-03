@@ -57,6 +57,9 @@ def clear_history():
 def add_favorite(prompt, name=None, tags=None):
     """Save a prompt as a favorite."""
     favorites = _load(FAVORITES_FILE)
+    for existing in favorites:
+        if existing.get("prompt", "").strip() == prompt.strip():
+            return {"skipped": True, "existing_id": existing["id"]}
     entry = {
         "id": len(favorites) + 1,
         "name": name or f"Favorite #{len(favorites) + 1}",
