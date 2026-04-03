@@ -61,7 +61,11 @@ def build_embeddings(force=False):
         return data
 
     print("Building embeddings for all prompts (first time only)...", file=sys.stderr)
-    from sentence_transformers import SentenceTransformer
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
+        print("Error: sentence-transformers not installed. Run: pip install sentence-transformers", file=sys.stderr)
+        sys.exit(1)
 
     model = SentenceTransformer(MODEL_NAME)
     prompts = load_database()
@@ -83,9 +87,13 @@ def build_embeddings(force=False):
     return data
 
 
-def semantic_search(query, limit=10, category=None, style=None):
+def semantic_search(query, limit=10, category=None, style=None, threshold=0.1):
     """Search prompts by semantic similarity."""
-    from sentence_transformers import SentenceTransformer
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
+        print("Error: sentence-transformers not installed. Run: pip install sentence-transformers", file=sys.stderr)
+        sys.exit(1)
 
     data = build_embeddings()
     embeddings = data["embeddings"]
@@ -114,7 +122,7 @@ def semantic_search(query, limit=10, category=None, style=None):
     results = []
     for idx in top_indices:
         score = float(cosine_scores[idx])
-        if score < 0.1:
+        if score < threshold:
             continue
         p = prompts[idx]
         results.append({
@@ -128,9 +136,13 @@ def semantic_search(query, limit=10, category=None, style=None):
     return results
 
 
-def semantic_search_verbose(query, limit=10, category=None, style=None):
+def semantic_search_verbose(query, limit=10, category=None, style=None, threshold=0.1):
     """Search with full prompt content included."""
-    from sentence_transformers import SentenceTransformer
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
+        print("Error: sentence-transformers not installed. Run: pip install sentence-transformers", file=sys.stderr)
+        sys.exit(1)
 
     data = build_embeddings()
     embeddings = data["embeddings"]
@@ -157,7 +169,7 @@ def semantic_search_verbose(query, limit=10, category=None, style=None):
     results = []
     for idx in top_indices:
         score = float(cosine_scores[idx])
-        if score < 0.1:
+        if score < threshold:
             continue
         p = prompts[idx]
         results.append({
@@ -228,6 +240,7 @@ def main():
     sp.add_argument("--category", "-c", help="Filter by category")
     sp.add_argument("--style", "-s", help="Filter by style")
     sp.add_argument("--verbose", "-v", action="store_true", help="Include full prompt content")
+    sp.add_argument("--threshold", "-t", type=float, default=0.1, help="Min similarity to include (default: 0.1)")
 
     # Find similar
     fp = sub.add_parser("similar", help="Find prompts similar to a given prompt")
@@ -242,9 +255,9 @@ def main():
 
     if args.command == "search":
         if args.verbose:
-            results = semantic_search_verbose(args.query, args.limit, args.category, args.style)
+            results = semantic_search_verbose(args.query, args.limit, args.category, args.style, args.threshold)
         else:
-            results = semantic_search(args.query, args.limit, args.category, args.style)
+            results = semantic_search(args.query, args.limit, args.category, args.style, args.threshold)
         print(json.dumps(results, indent=2, ensure_ascii=False))
 
     elif args.command == "similar":
